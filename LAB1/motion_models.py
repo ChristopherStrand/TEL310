@@ -91,3 +91,4 @@ def sample_normal_distribution(b_squared):
 def sample_triangular_distribution(b_squared):
     b = math.sqrt(b_squared)
     return (math.sqrt(6) / 2) * (random.uniform(-b, b) + random.uniform(-b, b))
+
