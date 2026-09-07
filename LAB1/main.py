@@ -47,3 +47,47 @@ def prob_normal_distribution(a, b_squared):
     return (1 / math.sqrt(2 * math.pi * b_squared)) * math.exp(-(a**2) / (2 * b_squared))
 
 
+def prob_triangular_distribution(a, b_squared):
+    if abs(a) > math.sqrt(6 * b_squared):
+        return 0
+    else:
+        return (1 / math.sqrt(6 * b_squared)) - (abs(a) / (6 * b_squared))
+
+
+
+
+
+def sample_motion_model_velocity(u_t, x_t_1, delta_t, alpha):
+    """
+
+    """
+    v, omega = u_t
+    x, y, theta = x_t_1
+    alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = alpha
+
+    v_hat = v + sample_normal_distribution(alpha1 * v**2 + alpha2 * omega**2)
+    omega_hat = omega + sample_normal_distribution(alpha3 * v**2 + alpha4 * omega**2)
+    gamma_hat = sample_normal_distribution(alpha5 * v**2 + alpha6 * omega**2)
+
+    r_hat = v_hat / omega_hat
+    theta_hat = theta + omega_hat * delta_t
+
+    x_d = x - r_hat * (math.sin(theta) - math.sin(theta_hat))
+    y_d = y + r_hat * (math.cos(theta) - math.cos(theta_hat))
+    theta_d = theta_hat + gamma_hat * delta_t
+
+    return (x_d, y_d, theta_d)
+
+
+def sample_normal_distribution(b_squared):
+    b = math.sqrt(b_squared)
+    total = 0
+    for i in range(12):
+        total += random.uniform(-b, b)
+
+    return 0.5 * total
+
+
+def sample_triangular_distribution(b_squared):
+    b = math.sqrt(b_squared)
+    return (math.sqrt(6) / 2) * (random.uniform(-b, b) + random.uniform(-b, b))
