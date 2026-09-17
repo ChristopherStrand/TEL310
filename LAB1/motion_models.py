@@ -116,5 +116,23 @@ def motion_model_odometry(x, x_d, x_hat, x_hat_d, alpha):
     return p1 * p2 * p3
 
 
+def sample_motion_model_odometry(u_t, x_t_1, alpha):
+    x_hat, x_hat_d = u_t
+    x, y, theta = x_t_1
+    x_hat_pos, y_hat_pos, theta_hat = x_hat
+    x_hat_d_pos, y_hat_d_pos, theta_hat_d = x_hat_d
+    alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = alpha
 
+    delta_rot_1 = math.atan2(y_hat_d_pos - y_hat_pos, x_hat_d_pos - x_hat_pos) - theta_hat
+    delta_trans = math.sqrt((x_hat_d_pos - x_hat_pos)**2 + (y_hat_d_pos - y_hat_pos)**2)
+    delta_rot_2 = theta_hat_d - theta_hat - delta_rot_1
+    delta_hat_rot_1 = delta_rot_1 - sample_normal_distribution(alpha1 * delta_rot_1**2 + alpha2 * delta_trans**2)
+    delta_hat_trans = delta_trans - sample_normal_distribution(alpha3 * delta_trans**2 + alpha4 * (delta_rot_1**2 + delta_rot_2**2))
+    delta_hat_rot_2 = delta_rot_2 - sample_normal_distribution(alpha5 * delta_rot_2**2 + alpha6 * delta_trans**2)
+
+    x_d = x + delta_hat_trans * math.cos(theta + delta_hat_rot_1)
+    y_d = y + delta_hat_trans * math.sin(theta + delta_hat_rot_1)
+    theta_d = theta + delta_hat_rot_1 + delta_hat_rot_2
+
+    return (x_d, y_d, theta_d)
 
