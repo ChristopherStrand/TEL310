@@ -92,3 +92,29 @@ def sample_triangular_distribution(b_squared):
     b = math.sqrt(b_squared)
     return (math.sqrt(6) / 2) * (random.uniform(-b, b) + random.uniform(-b, b))
 
+
+def motion_model_odometry(x, x_d, x_hat, x_hat_d, alpha):
+    x_pos, y_pos, theta = x
+    x_d_pos, y_d_pos, theta_d = x_d
+    x_hat_pos, y_hat_pos, theta_hat = x_hat
+    x_hat_d_pos, y_hat_d_pos, theta_hat_d = x_hat_d
+    alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = alpha
+
+    delta_rot_1 = math.atan2(y_hat_d_pos - y_hat_pos, x_hat_d_pos - x_hat_pos) - theta_hat
+    delta_trans = math.sqrt((x_hat_d_pos - x_hat_pos)**2 + (y_hat_d_pos - y_hat_pos)**2)
+    delta_rot_2 = theta_hat_d - theta_hat - delta_rot_1
+
+
+    delta_hat_rot_1 = math.atan2(y_d_pos - y_pos, x_d_pos - x_pos) - theta
+    delta_hat_trans = math.sqrt((x_d_pos - x_pos)**2 + (y_d_pos - y_pos)**2)
+    delta_hat_rot_2 = theta_d - theta - delta_hat_rot_1
+
+    p1 = prob_normal_distribution(delta_rot_1 - delta_hat_rot_1, alpha1 * abs(delta_rot_1) + alpha2 * delta_trans)
+    p2 = prob_normal_distribution(delta_trans - delta_hat_trans, alpha3 * abs(delta_rot_1) + alpha4 * (abs(delta_rot_1) + abs(delta_rot_2)))
+    p3 = prob_normal_distribution(delta_rot_2 - delta_hat_rot_2, alpha5 * abs(delta_rot_2) + alpha6 * delta_trans)
+
+    return p1 * p2 * p3
+
+
+
+
