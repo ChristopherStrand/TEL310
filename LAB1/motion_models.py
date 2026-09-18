@@ -59,7 +59,15 @@ def prob_triangular_distribution(a, b_squared):
 
 def sample_motion_model_velocity(u_t, x_t_1, delta_t, alpha):
     """
+    Generates a sampled position based on velocity control inputs with motion noise.
 
+    Parameters:
+        u_t: Control input with v being the forward speed and omega being how fast it turns.
+        x_t_1: Previous robot pose (x, y, theta).
+        delta_t: Time between x_t_1 and the generated position.
+        alpha: Six parameters (alpha1, ..., alpha6) that describe the amount of noise.
+
+    Returns a generated position that is a possibility with the given initial position, control input, time step, and motion error parameters.
     """
     v, omega = u_t
     x, y, theta = x_t_1
@@ -94,6 +102,18 @@ def sample_triangular_distribution(b_squared):
 
 
 def motion_model_odometry(x, x_d, x_hat, x_hat_d, alpha):
+    """
+    Calculates the probability of the robot moving from the previous pose x to the current pose x_d, given the odometry measurements.
+
+    Parameters:
+        x: Current robot pose (x, y, theta).
+        x_d: Final robot pose (x, y, theta).
+        x_hat: Odometry start position (x, y, theta).
+        x_hat_d: Odometry end position (x, y, theta).
+        alpha: Six parameters (alpha1, ..., alpha6) that describe the amount of noise.
+
+    Returns the probability p(x_d|x, u_t) where u_t is the odometry information from x_hat to x_hat_d.
+    """
     x_pos, y_pos, theta = x
     x_d_pos, y_d_pos, theta_d = x_d
     x_hat_pos, y_hat_pos, theta_hat = x_hat
@@ -117,6 +137,16 @@ def motion_model_odometry(x, x_d, x_hat, x_hat_d, alpha):
 
 
 def sample_motion_model_odometry(u_t, x_t_1, alpha):
+    """
+    Generates a sampled position based on odometry measurements with motion noise.
+
+    Parameters:
+        u_t: Control input as odometry readings [x_hat, x_hat_d] where x_hat is start position and x_hat_d is end position.
+        x_t_1: Previous robot pose (x, y, theta).
+        alpha: Six parameters (alpha1, ..., alpha6) that describe the amount of noise.
+
+    Returns a generated position that is a possibility with the given initial position, odometry measurements, and motion error parameters.
+    """
     x_hat, x_hat_d = u_t
     x, y, theta = x_t_1
     x_hat_pos, y_hat_pos, theta_hat = x_hat
